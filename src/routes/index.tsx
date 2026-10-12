@@ -1,24 +1,64 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { ShoppingBag, Search, Plus, Minus, X, Heart, CakeSlice, Candy, Cookie, Sparkles, ArrowRight } from "lucide-react";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
-export const Route = createFileRoute("/")({
-  component: Index,
-});
+export const Route = createFileRoute("/")({ component: Index });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
+const products = [
+  { id: 1, name: "Brigadeiros Gourmet", category: "Brigadeiros", price: 3.5, emoji: "🍫", color: "#f5e0d2", description: "Chocolate intenso e granulado crocante" },
+  { id: 2, name: "Cupcake de Morango", category: "Bolos", price: 12, emoji: "🧁", color: "#f7dce5", description: "Massa fofinha com cobertura cremosa" },
+  { id: 3, name: "Cookies com Chocolate", category: "Cookies", price: 8.5, emoji: "🍪", color: "#f4e2bd", description: "Casquinha crocante, centro macio" },
+  { id: 4, name: "Caixa de Macarons", category: "Especiais", price: 24, emoji: "🍬", color: "#e8e0f7", description: "Seis unidades de sabores delicados" },
+  { id: 5, name: "Bolo Red Velvet", category: "Bolos", price: 16, emoji: "🍰", color: "#f6d7d4", description: "Clássico aveludado com cream cheese" },
+  { id: 6, name: "Brownie da Casa", category: "Cookies", price: 9, emoji: "🍮", color: "#e8d3c4", description: "Brownie úmido com chocolate belga" },
+  { id: 7, name: "Trufas Sortidas", category: "Brigadeiros", price: 5, emoji: "🍡", color: "#f2dfd5", description: "Recheios cremosos feitos à mão" },
+  { id: 8, name: "Caixa Festa Doce", category: "Especiais", price: 39.9, emoji: "🎁", color: "#f5e6b8", description: "Uma seleção perfeita para presentear" },
+];
+const categories = ["Todos", "Brigadeiros", "Bolos", "Cookies", "Especiais"];
+const money = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
 function Index() {
+  const [category, setCategory] = useState("Todos");
+  const [search, setSearch] = useState("");
+  const [cart, setCart] = useState<Record<number, number>>({});
+  const [cartOpen, setCartOpen] = useState(false);
+  const [checkout, setCheckout] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const visible = useMemo(() => products.filter(p => (category === "Todos" || p.category === category) && p.name.toLowerCase().includes(search.toLowerCase())), [category, search]);
+  const count = Object.values(cart).reduce((a, b) => a + b, 0);
+  const total = products.reduce((sum, p) => sum + p.price * (cart[p.id] || 0), 0);
+  const change = (id: number, delta: number) => setCart(old => ({ ...old, [id]: Math.max(0, (old[id] || 0) + delta) }));
+  const selected = products.filter(p => cart[p.id]);
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen bg-[#fffaf5] text-[#39251f]">
+      <div className="bg-[#482c25] px-4 py-2 text-center text-xs tracking-wide text-white">Feito com carinho, fresquinho para adoçar seu dia ✨</div>
+      <header className="sticky top-0 z-30 border-b border-[#f0e4da] bg-[#fffaf5]/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
+          <a href="#" className="flex items-center gap-3 no-underline"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#f5dfd1] text-2xl">🍓</span><span><strong className="block text-xl leading-tight tracking-tight">Doce Encanto</strong><small className="text-xs text-[#98766a]">confeitaria artesanal</small></span></a>
+          <nav className="hidden items-center gap-7 text-sm font-medium md:flex"><a className="hover:text-[#b46a53]" href="#inicio">Início</a><a className="hover:text-[#b46a53]" href="#doces">Nossos doces</a><a className="hover:text-[#b46a53]" href="#sobre">Nossa história</a></nav>
+          <button onClick={() => setCartOpen(true)} className="relative flex items-center gap-2 rounded-full bg-[#482c25] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#684239]"><ShoppingBag size={18}/> <span className="hidden sm:inline">Sacola</span>{count > 0 && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-[#e8b69e] px-1 text-xs text-[#482c25]">{count}</span>}</button>
+        </div>
+      </header>
+      <main>
+        <section id="inicio" className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-14 md:grid-cols-2 md:py-24">
+          <div className="max-w-xl"><span className="mb-5 inline-flex items-center gap-2 rounded-full bg-[#f5e4d8] px-4 py-2 text-xs font-bold uppercase tracking-[.18em] text-[#925b48]"><Sparkles size={14}/> Pequenos momentos, grandes sabores</span><h1 className="text-5xl font-semibold leading-[1.08] tracking-tight md:text-7xl" style={{fontFamily:"Georgia, serif"}}>Um docinho deixa tudo <span className="italic text-[#bd795f]">mais feliz.</span></h1><p className="mt-6 max-w-md text-base leading-7 text-[#876d62]">Doces artesanais feitos com ingredientes especiais e muito amor. Escolha seu favorito e transforme o dia em uma ocasião especial.</p><div className="mt-8 flex flex-wrap gap-3"><a href="#doces" className="inline-flex items-center gap-3 rounded-full bg-[#482c25] px-6 py-4 text-sm font-semibold text-white no-underline transition hover:-translate-y-0.5 hover:bg-[#684239]">Explorar delícias <ArrowRight size={17}/></a><a href="#sobre" className="rounded-full border border-[#dfc8ba] px-6 py-4 text-sm font-semibold text-[#684239] no-underline hover:bg-white">Nossa história</a></div><div className="mt-10 flex items-center gap-3 text-sm text-[#876d62]"><span className="text-lg">★★★★★</span><span>Feito à mão, com carinho em cada detalhe</span></div></div>
+          <div className="relative mx-auto w-full max-w-xl"><div className="absolute -inset-3 rotate-3 rounded-[2.5rem] bg-[#f3dfd1]"></div><div className="relative flex min-h-[360px] flex-col items-center justify-center overflow-hidden rounded-[2rem] bg-[#f5e7dc] p-8 md:min-h-[470px]"><div className="absolute left-8 top-8 rounded-full bg-white/80 px-4 py-2 text-xs font-bold text-[#875440]">♡ Feito com amor</div><div className="text-center"><div className="mb-3 text-8xl drop-shadow-sm md:text-9xl">🧁</div><div className="text-6xl">🍓 🍫 🍪</div><p className="mt-5 text-sm tracking-[.2em] text-[#946b59]">SUA PAUSA MAIS DOCE</p></div><div className="absolute bottom-6 right-6 rounded-2xl bg-white/90 p-4 shadow-sm"><p className="text-xs text-[#98766a]">Favorito da casa</p><p className="mt-1 font-semibold">Cupcake de morango</p></div></div></div>
+        </section>
+        <section className="border-y border-[#f0e4da] bg-white/70"><div className="mx-auto grid max-w-7xl grid-cols-1 gap-5 px-5 py-6 text-center sm:grid-cols-3"><div className="flex items-center justify-center gap-3"><Heart className="text-[#bd795f]" size={20}/><span className="text-sm font-medium">Produção artesanal</span></div><div className="flex items-center justify-center gap-3"><CakeSlice className="text-[#bd795f]" size={20}/><span className="text-sm font-medium">Ingredientes selecionados</span></div><div className="flex items-center justify-center gap-3"><Candy className="text-[#bd795f]" size={20}/><span className="text-sm font-medium">Feito fresquinho todos os dias</span></div></div></section>
+        <section id="doces" className="mx-auto max-w-7xl px-5 py-16 md:py-24"><div className="mb-9 flex flex-col justify-between gap-5 md:flex-row md:items-end"><div><p className="text-xs font-bold uppercase tracking-[.2em] text-[#bd795f]">Escolhidos para você</p><h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl" style={{fontFamily:"Georgia, serif"}}>Nossas delícias</h2><p className="mt-3 text-sm text-[#98766a]">Qual vai ser o seu mimo de hoje?</p></div><label className="flex items-center gap-3 rounded-full border border-[#ead8cc] bg-white px-4 py-3 md:w-72"><Search size={18} className="text-[#98766a]"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar um docinho..." className="w-full bg-transparent text-sm outline-none placeholder:text-[#b9a197]"/></label></div>
+          <div className="mb-8 flex gap-2 overflow-x-auto pb-2">{categories.map(c=><button key={c} onClick={()=>setCategory(c)} className={`whitespace-nowrap rounded-full px-5 py-3 text-sm font-semibold transition ${category===c?"bg-[#482c25] text-white":"border border-[#ead8cc] bg-white text-[#80665b] hover:border-[#bd795f]"}`}>{c}</button>)}</div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{visible.map(p=><article key={p.id} className="group overflow-hidden rounded-[1.5rem] border border-[#f0e4da] bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#482c25]/5"><div className="relative grid h-52 place-items-center overflow-hidden" style={{backgroundColor:p.color}}><span className="transition duration-300 group-hover:scale-110 text-8xl">{p.emoji}</span><span className="absolute left-4 top-4 rounded-full bg-white/85 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#875440]">{p.category}</span><button onClick={()=>change(p.id,1)} aria-label={`Adicionar ${p.name}`} className="absolute bottom-3 right-3 grid h-11 w-11 place-items-center rounded-full bg-white text-[#482c25] shadow-md transition hover:bg-[#482c25] hover:text-white"><Plus size={20}/></button></div><div className="p-5"><h3 className="font-semibold">{p.name}</h3><p className="mt-2 min-h-10 text-sm leading-5 text-[#98766a]">{p.description}</p><div className="mt-4 flex items-center justify-between"><strong className="text-lg">{money(p.price)}</strong>{cart[p.id]>0&&<span className="text-xs font-semibold text-[#b46a53]">{cart[p.id]} na sacola</span>}</div></div></article>)}</div>
+          {visible.length===0&&<p className="py-12 text-center text-[#98766a]">Não encontramos doces com esse nome. Tente outra busca! 🍬</p>}
+        </section>
+        <section id="sobre" className="bg-[#f4e5d9]"><div className="mx-auto grid max-w-7xl items-center gap-8 px-5 py-16 md:grid-cols-2 md:py-20"><div className="text-8xl md:text-9xl">🍓🍰</div><div><p className="text-xs font-bold uppercase tracking-[.2em] text-[#a5644c]">Um pouquinho de carinho</p><h2 className="mt-3 text-4xl font-semibold leading-tight md:text-5xl" style={{fontFamily:"Georgia, serif"}}>A vida fica melhor com um toque de doçura.</h2><p className="mt-5 leading-7 text-[#80665b]">A Doce Encanto nasceu da vontade de transformar receitas feitas com amor em momentos especiais. Cada doce é preparado com cuidado para deixar sua rotina mais leve e saborosa.</p><a href="#doces" className="mt-6 inline-flex items-center gap-2 font-semibold text-[#684239] no-underline">Escolha sua delícia <ArrowRight size={17}/></a></div></div></section>
+      </main>
+      <footer className="bg-[#482c25] px-5 py-10 text-white"><div className="mx-auto flex max-w-7xl flex-col justify-between gap-6 sm:flex-row sm:items-center"><div><p className="text-xl font-semibold" style={{fontFamily:"Georgia, serif"}}>🍓 Doce Encanto</p><p className="mt-2 text-sm text-[#e1c9bb]">Um pouquinho de felicidade em cada mordida.</p></div><p className="text-xs text-[#e1c9bb]">© 2026 Doce Encanto · Loja demonstrativa para teste</p></div></footer>
+      {cartOpen&&<div className="fixed inset-0 z-50"><button aria-label="Fechar sacola" onClick={()=>setCartOpen(false)} className="absolute inset-0 bg-[#25140f]/50"/><aside className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-[#fffaf5] shadow-2xl"><div className="flex items-center justify-between border-b border-[#ead8cc] px-6 py-5"><div><h2 className="text-2xl font-semibold" style={{fontFamily:"Georgia, serif"}}>Sua sacola</h2><p className="mt-1 text-sm text-[#98766a]">{count} {count===1?"item":"itens"}</p></div><button onClick={()=>setCartOpen(false)} className="rounded-full p-2 hover:bg-[#f3e4d9]"><X/></button></div>
+        <div className="flex-1 overflow-y-auto px-6 py-4">{selected.length===0?<div className="py-16 text-center"><span className="text-5xl">🛍️</span><p className="mt-4 font-semibold">Sua sacola está vazia</p><p className="mt-2 text-sm text-[#98766a]">Adicione um docinho para começar.</p></div>:selected.map(p=><div key={p.id} className="flex items-center gap-4 border-b border-[#ead8cc] py-4"><div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl text-3xl" style={{backgroundColor:p.color}}>{p.emoji}</div><div className="min-w-0 flex-1"><p className="font-semibold">{p.name}</p><p className="mt-1 text-sm text-[#98766a]">{money(p.price)}</p><div className="mt-2 flex items-center gap-3"><button onClick={()=>change(p.id,-1)} className="grid h-7 w-7 place-items-center rounded-full border border-[#dfc8ba]"><Minus size={13}/></button><span className="text-sm">{cart[p.id]}</span><button onClick={()=>change(p.id,1)} className="grid h-7 w-7 place-items-center rounded-full border border-[#dfc8ba]"><Plus size={13}/></button></div></div><strong className="text-sm">{money(p.price*cart[p.id])}</strong></div>)}</div>
+        <div className="border-t border-[#ead8cc] p-6"><div className="mb-4 flex justify-between text-lg font-semibold"><span>Total</span><span>{money(total)}</span></div>{!checkout?<button disabled={!count} onClick={()=>setCheckout(true)} className="w-full rounded-full bg-[#482c25] px-5 py-4 font-semibold text-white transition hover:bg-[#684239] disabled:cursor-not-allowed disabled:opacity-40">Continuar para finalizar</button>:sent?<div className="rounded-2xl bg-[#e7f2e5] p-4 text-sm leading-6 text-[#315b35]"><strong>Pedido demonstrativo registrado! 💗</strong><p>Obrigado, {name}! Esta é uma loja de teste; nenhum pagamento ou pedido real foi enviado.</p><button onClick={()=>{setCart({});setCheckout(false);setCartOpen(false);setSent(false);setName("");setEmail("")}} className="mt-3 font-semibold underline">Voltar à loja</button></div>:<form onSubmit={e=>{e.preventDefault();setSent(true)}} className="space-y-3"><p className="text-sm text-[#98766a]">Preencha os dados para simular o pedido. Nenhuma informação será enviada.</p><input required value={name} onChange={e=>setName(e.target.value)} placeholder="Seu nome" className="w-full rounded-xl border border-[#ead8cc] bg-white px-4 py-3 text-sm outline-none focus:border-[#bd795f]"/><input required type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Seu e-mail" className="w-full rounded-xl border border-[#ead8cc] bg-white px-4 py-3 text-sm outline-none focus:border-[#bd795f]"/><button className="w-full rounded-full bg-[#482c25] px-5 py-4 font-semibold text-white hover:bg-[#684239]">Confirmar pedido de teste</button><button type="button" onClick={()=>setCheckout(false)} className="w-full py-2 text-sm text-[#98766a]">Voltar à sacola</button></form>}</div>
+      </aside></div>}
     </div>
   );
 }
